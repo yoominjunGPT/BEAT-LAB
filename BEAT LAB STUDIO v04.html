@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BEAT LAB STUDIO v04</title>
+<style>
+:root{--bg:#090812;--line:#393052;--txt:#f5f1ff;--muted:#aaa2c2;--pink:#ff4fd8;--cyan:#69e4ff;--green:#8dffbf;--cell:#0d0b18;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#30214c 0,transparent 42%),var(--bg);color:var(--txt);font-family:system-ui,-apple-system,sans-serif}
+main{max-width:1000px;margin:auto;padding:22px 14px 60px}h1{font-size:clamp(26px,5vw,40px);margin:0 0 6px;letter-spacing:-1.5px}h1 span{color:var(--pink)}
+.sub,.hint{color:var(--muted);font-size:12px;line-height:1.65}h2{font-size:17px;margin:0 0 12px}
+.card{background:linear-gradient(145deg,#19162b,#11101d);border:1px solid var(--line);border-radius:18px;padding:17px;margin:13px 0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+input,select{width:100%;background:var(--cell);border:1px solid #393153;border-radius:11px;padding:10px;color:var(--txt);font:inherit}
+button{border:0;border-radius:12px;padding:11px 15px;background:linear-gradient(100deg,#ff4fd8,#8b65ff);color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+button.s{background:#292442;border:1px solid #4a416c}button:disabled{opacity:.45}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.out{background:var(--cell);border:1px solid #393153;border-radius:14px;padding:14px;margin-top:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
+.pill{display:inline-block;border:1px solid #4b416c;border-radius:99px;padding:4px 9px;font-size:11px;color:var(--cyan);margin:2px 4px 2px 0}
+.secs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.sec{flex:0 0 auto;min-width:92px;background:var(--cell);border:1px solid #393153;border-radius:13px;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.sec small{color:var(--muted);font-size:11px}.sec.on{border-color:var(--pink)}.sec.hl{background:#2a1f45}.sec span{color:var(--cyan);font-size:13px}
+.row{display:grid;grid-template-columns:58px 1fr;gap:6px;align-items:center;margin:5px 0}.row strong{font-size:12px}
+.cells{display:grid;gap:3px}.c{height:28px;padding:0;border-radius:6px;background:var(--cell);border:1px solid #393153}.c.q{border-left:2px solid #5a4d85}.c.on{background:var(--pink);border-color:var(--pink)}
+.mx{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.mx div{background:var(--cell);border:1px solid #302946;border-radius:11px;padding:9px;font-size:12px}.mx input[type=range]{padding:0}
+.trk{padding:7px 0;border-bottom:1px solid #2b2543;font-size:12px}.trk:last-child{border:0}.trk b{color:var(--cyan)}
+#st{color:var(--green);font-size:12px;margin-top:10px;min-height:16px}
+@media(max-width:650px){.grid{grid-template-columns:1fr 1fr}.mx{grid-template-columns:1fr 1fr}}
+</style></head><body><main>
+<h1>BEAT LAB <span>STUDIO</span></h1>
+<p class="sub">도입 → 전개 → 빌드업 → 하이라이트까지 구간마다 다른 비트와 멜로디를 만들고, 스텝 단위로 고칠 수 있어요.</p>
+
+<section class="card"><h2>곡 설정</h2><div class="grid">
+<div><label>장르 (BPM 자동 설정)</label><select id="genre"></select></div>
+<div><label>템포 (BPM)</label><input id="bpm" type="number" min="60" max="200" value="140"></div>
+<div><label>조성</label><select id="key"></select></div>
+<div><label>박자</label><select id="meter"><option value="4">4/4</option><option value="3">3/4 · 6/8 느낌</option></select></div>
+<div><label>곡 구성</label><select id="form"><option value="std">표준 (도입·전개·빌드업·하이라이트·브레이크·하이라이트·마무리)</option><option value="short">짧게 (도입·전개·하이라이트·마무리)</option></select></div>
+<div><label>멜로디 악기</label><select id="lv"><option value="auto">구간별 자동</option><option value="synth">신스 리드</option><option value="piano">피아노</option><option value="bell">벨</option><option value="pluck">플럭</option></select></div>
+</div>
+<div class="act"><button id="gen">✦ 곡 전체 새로 만들기</button><button class="s" id="mel">🎹 멜로디만 다시</button></div></section>
+
+<section class="card"><h2>구간별 비트 · 멜로디</h2>
+<p class="hint">구간을 누르면 아래 시퀀서에서 편집하고, ▶로 그 구간만 반복 재생해요.</p>
+<div class="secs" id="secs"></div>
+<div class="act"><button id="play">▶ 전체 미리 듣기</button><button class="s" id="stop" disabled>■ 정지</button><button class="s" id="wav">↓ WAV 저장</button></div>
+<div id="st" aria-live="polite"></div><div id="info" class="out"></div></section>
+
+<section class="card"><h2>스텝 시퀀서 <span class="hint" id="gl"></span></h2>
+<p class="hint">칸을 눌러 켜고 끄면 선택한 구간의 모든 마디에 적용돼요. 재생 중에도 바로 반영됩니다.</p><div id="grid"></div></section>
+
+<section class="card"><h2>믹서</h2><div class="mx" id="mx"></div></section>
+
+<section class="card"><h2>가사 · 곡 설계</h2><div class="grid">
+<div><label>곡 주제</label><input id="topic" value="자신감, 한계를 넘어 성공하기"></div>
+<div><label>가사 언어</label><select id="lang"><option>한국어</option><option selected>영어</option><option>한영 혼합</option></select></div>
+<div><label>키워드</label><input id="kw" value="밤, 야망, 집중, 승리"></div></div>
+<div class="act"><button id="cmp">✦ 곡 설계서 만들기</button><button class="s" id="cp" disabled>복사</button></div>
+<div id="cmpOut" class="out">현재 곡의 코드, 구성, 멜로디를 바탕으로 설계서와 가사 초안을 만듭니다.</div></section>
+<p class="hint">브라우저 안에서만 동작하는 창작 보조 도구예요. 결과는 편집해서 발전시킬 초안입니다.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id),pick=a=>a[Math.floor(Math.random()*a.length)],R=Math.random;
+const NN=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],SC={minor:[0,2,3,5,7,8,10],major:[0,2,4,5,7,9,11]};
+const mtof=m=>440*2**((m-69)/12),nm=m=>NN[m%12]+(Math.floor(m/12)-1);
+const G={'Trap':{b:140,k:[0,10],s:[8],h:.3,sw:0},'Dark Trap':{b:136,k:[0,10],s:[8],h:.2,sw:0},'Drill':{b:144,k:[0,7,10],s:[8],h:.2,sw:0},'Boom Bap':{b:90,k:[0,10],s:[4,12],h:0,sw:.18},'Lo-fi Hip Hop':{b:78,k:[0,9],s:[4,12],h:0,sw:.22},'Phonk':{b:130,k:[0,6,10],s:[4,12],h:.25,sw:0},'Rage':{b:150,k:[0,6,10],s:[8],h:.35,sw:0},'Jersey Club':{b:140,k:[0,3,6,10,12],s:[4,12],h:.1,sw:0},'UK Garage':{b:132,k:[0,10],s:[4,12],h:0,sw:.12},'R&B Trap':{b:120,k:[0,10],s:[8],h:.15,sw:.08},'Cloud Rap':{b:130,k:[0,10],s:[8],h:.2,sw:.05}};
+const P={minor:[[0,5,2,6],[0,6,5,6],[0,3,5,4],[0,5,6,4]],major:[[0,4,5,3],[0,5,3,4],[0,3,4,3]]};
+const FORMS={short:[['intro',4],['verse',8],['hook',8],['outro',4]],std:[['intro',4],['verse',8],['build',4],['hook',8],['break',4],['hook',8],['outro',4]]};
+const LBL={intro:'도입',verse:'전개',build:'빌드업',hook:'하이라이트',break:'브레이크',outro:'마무리'};
+const LAY={intro:'패드 · 약한 하이햇 · 벨 · 끝에 라이저',verse:'킥·스네어·하이햇 · 808 · 키 스탭 · 피아노 모티브',build:'스네어 롤 · 하이햇 · 라이저 · 상승 아르페지오',hook:'풀 드럼+클랩 · 하이햇 롤 · 808 · 패드 · 신스 리드 · 크래시',break:'드럼 제거 · 패드 · 임팩트 · 벨',outro:'킥 · 패드 · 벨 하강'};
+const ROWS=[['kick','킥'],['snare','스네어'],['clap','클랩'],['hat','하이햇'],['ohat','오픈햇'],['perc','퍼커션']];
+const MX=[['kick','킥'],['snare','스네어/클랩'],['hat','하이햇'],['bass','808'],['chord','코드/패드'],['lead','멜로디'],['fx','효과']];
+const mix={kick:.9,snare:.8,hat:.55,bass:.9,chord:.6,lead:.7,fx:.6},mute={};
+let actx,ctx,bus,nbuf,song,sel=0,playing=false,sched,evs=[],ei=0,t0=0,len=0,rng=[0,0],starts=[],hl=-1,lastTxt='';
+$('genre').innerHTML=Object.keys(G).map(g=>`<option>${g}</option>`).join('');
+$('key').innerHTML=NN.flatMap((n,i)=>['minor','major'].map(m=>`<option value="${i},${m}">${n} ${m}</option>`)).join('');$('key').value='5,minor';
+$('genre').onchange=()=>{$('bpm').value=G[$('genre').value].b};$('genre').value='Trap';
+
+/* ---------- 작곡 ---------- */
+const dm=d=>55+song.key+SC[song.mode][((d%7)+7)%7]+12*Math.floor(d/7);
+const tri=d=>[0,2,4].map(j=>dm(d+j));
+const cn=d=>{const S=song,r=(S.key+SC[S.mode][d%7])%12,t=(SC[S.mode][(d+2)%7]-SC[S.mode][d%7]+12)%12;return NN[r]+(t===3?'m':'')};
+function mkMotif(){const rh=[[0,3,6,10,12],[0,4,6,8,12],[0,2,6,9,13],[0,3,8,11,14]];
+ return [0,1].map(()=>{let c=0;return pick(rh).map(s=>{c+=pick([-2,-1,-1,0,1,1,2]);return[s,c]})})}
+function genDrums(T,g,n){
+ const z=()=>Array(n).fill(0),d={kick:z(),snare:z(),clap:z(),hat:z(),ohat:z(),perc:z()};
+ const sn=n===16?g.s:[6],kk=n===16?g.k:[0,9],set=(a,ix)=>ix.forEach(i=>{if(i<n)a[i]=1}),hv=(e,p=1)=>{for(let i=0;i<n;i+=e)if(R()<p)d.hat[i]=1};
+ if(T==='intro'){set(d.kick,[0]);hv(4)}
+ else if(T==='verse'){set(d.kick,kk);if(R()<.5)set(d.kick,[n-2]);set(d.snare,sn);hv(2,.9)}
+ else if(T==='build'){set(d.snare,n===16?[4,12]:[6]);hv(1,.7)}
+ else if(T==='hook'){set(d.kick,kk);if(R()<.6)set(d.kick,[n-4]);set(d.snare,sn);set(d.clap,sn);hv(2);for(let i=n-4;i<n;i++)if(R()<g.h)d.hat[i]=1;set(d.ohat,[n-1]);if(R()<.5)set(d.perc,[3,11])}
+ else if(T==='break')set(d.kick,[0]);
+ else{set(d.kick,[0]);hv(4,.8)}
+ return d}
+function genMel(sc){const S=song,n=S.spb,out=[];
+ for(let b=0;b<sc.bars;b++){const cd=S.prog[b%4],hi=(sc.type==='hook'||sc.type==='build')?7:0;
+  if(sc.type==='build'){for(let s=0;s<n;s+=2)out.push({s:b*n+s,m:dm(cd+[0,2,4,7][(s/2)%4]+hi+(b>=sc.bars-2?2:0)),d:2});continue}
+  let ns=S.motif[b%2].filter(x=>x[0]<n);
+  if(['intro','outro','break'].includes(sc.type))ns=ns.slice(0,2);else if(sc.type==='verse'&&b%2)ns=ns.slice(0,3);
+  ns.forEach(([s,c],j)=>{const dg=cd+hi+(s%8===0?[0,2,4][Math.abs(c)%3]:c)-(sc.type==='outro'?b%4:0);out.push({s:b*n+s,m:dm(dg),d:Math.max(2,(ns[j+1]?ns[j+1][0]:n)-s)})})}
+ sc.mel=out}
+function gen(){
+ const genre=$('genre').value,g=G[genre],[k,mode]=$('key').value.split(','),spb=+$('meter').value===4?16:12;
+ song={genre,bpm:Math.max(60,Math.min(200,+$('bpm').value||140)),key:+k,mode,spb,prog:pick(P[mode]),motif:mkMotif()};
+ song.secs=FORMS[$('form').value].map(([type,bars])=>({type,bars,drum:genDrums(type,g,spb)}));
+ song.secs.forEach(genMel);sel=0;stopAll();renderAll()}
+function regenMel(){song.motif=mkMotif();song.secs.forEach(genMel);info();resync()}
+
+/* ---------- 사운드 ---------- */
+function mkBus(c){const m=c.createGain(),cp=c.createDynamicsCompressor(),rv=c.createConvolver(),rg=c.createGain(),b={m};
+ m.gain.value=.8;cp.threshold.value=-14;cp.ratio.value=6;
+ const n=Math.floor(c.sampleRate*1.6),ir=c.createBuffer(2,n,c.sampleRate);
+ for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(R()*2-1)*Math.pow(1-i/n,3)}
+ rv.buffer=ir;rg.gain.value=.3;rv.connect(rg);rg.connect(m);m.connect(cp);cp.connect(c.destination);
+ for(const k in mix){const g=c.createGain();g.gain.value=mute[k]?0:mix[k];g.connect(m);if(['chord','lead','fx','snare'].includes(k))g.connect(rv);b[k]=g}
+ return b}
+function mkNoise(c){const b=c.createBuffer(1,c.sampleRate*2,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=R()*2-1;return b}
+function osc(t,f,d,type,v,out,a=.005,f2,cut){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);
+ if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+Math.min(d*.4,.12));
+ g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v,.0002),t+a);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+ if(cut){const l=ctx.createBiquadFilter();l.type='lowpass';l.frequency.value=cut;o.connect(l);l.connect(g)}else o.connect(g);
+ g.connect(out);o.start(t);o.stop(t+d+.05)}
+function noi(t,d,v,out,type='highpass',fq=7000){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();
+ s.buffer=nbuf;s.loop=true;f.type=type;f.frequency.value=fq;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+ s.connect(f);f.connect(g);g.connect(out);s.start(t,R()*1.5);s.stop(t+d+.02)}
+const V={
+ kick:(t,v=1)=>osc(t,150,.25,'sine',.95*v,bus.kick,.002,45),
+ snare:(t,v=1)=>{noi(t,.17,.5*v,bus.snare,'highpass',1500);osc(t,200,.1,'triangle',.35*v,bus.snare,.002)},
+ clap:(t,v=1)=>[0,.012,.024].forEach(x=>noi(t+x,.11,.35*v,bus.snare,'bandpass',1800)),
+ hat:(t,v=1)=>noi(t,.04,.3*v,bus.hat,'highpass',8000),
+ ohat:(t,v=1)=>noi(t,.22,.22*v,bus.hat,'highpass',7000),
+ perc:(t,v=1)=>osc(t,420,.07,'square',.1*v,bus.hat,.002),
+ crash:t=>noi(t,1.3,.3,bus.fx,'highpass',5000),
+ impact:t=>{osc(t,90,.9,'sine',.8,bus.fx,.003,30);noi(t,.6,.3,bus.fx,'lowpass',900)},
+ riser:(t,d)=>{const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=nbuf;s.loop=true;f.type='bandpass';f.Q.value=2;
+  f.frequency.setValueAtTime(400,t);f.frequency.exponentialRampToValueAtTime(9000,t+d);g.gain.setValueAtTime(.02,t);g.gain.linearRampToValueAtTime(.3,t+d);
+  s.connect(f);f.connect(g);g.connect(bus.fx);s.start(t);s.stop(t+d+.05)},
+ bass:(t,m,d)=>{const f=mtof(m);osc(t,f*1.6,d+.1,'sine',.9,bus.bass,.004,f);osc(t,f*2,d*.5,'triangle',.12,bus.bass,.004)},
+ keys:(t,m,d)=>{osc(t,mtof(m),d*1.5,'triangle',.12,bus.chord,.004);osc(t,mtof(m)*2,d*.7,'sine',.04,bus.chord,.004)},
+ pad:(t,m,d)=>{const f=mtof(m),g=ctx.createGain(),l=ctx.createBiquadFilter();l.type='lowpass';l.frequency.value=1100;
+  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.06,t+.25);g.gain.setValueAtTime(.06,t+d-.3);g.gain.linearRampToValueAtTime(.0001,t+d);
+  [-7,7].forEach(c=>{const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=c;o.connect(l);o.start(t);o.stop(t+d+.05)});l.connect(g);g.connect(bus.chord)},
+ lead:(t,m,d,k)=>{const f=mtof(m),o=bus.lead;
+  if(k==='bell'){osc(t,f,d*2.2,'sine',.22,o,.004);osc(t,f*3.01,d*1.2,'sine',.07,o,.002)}
+  else if(k==='piano'){osc(t,f,d*1.6,'triangle',.2,o,.004);osc(t,f*2,d*.8,'sine',.06,o,.003)}
+  else if(k==='pluck')osc(t,f,Math.max(d,.2),'sawtooth',.12,o,.003,0,2200);
+  else{osc(t,f,d*1.1,'sawtooth',.13,o,.01,0,2600);osc(t,f*1.005,d*1.1,'square',.05,o,.01,0,1800)}}
+};
+
+/* ---------- 이벤트 생성 · 재생 ---------- */
+function buildEvents(a,b){const S=song,sd=60/S.bpm/4,sw=G[S.genre].sw,e=[],st=[],n=S.spb;let off=0;
+ for(let i=a;i<=b;i++){const sc=S.secs[i],T=sc.type;st.push([off,i]);
+  const at=s=>off+s*sd+(s%2?sw*sd:0),add=(s,f,...r)=>e.push({t:at(s),f,a:r});
+  const lv=$('lv').value==='auto'?{intro:'bell',verse:'piano',build:'pluck',hook:'synth',break:'bell',outro:'bell'}[T]:$('lv').value;
+  for(let bar=0;bar<sc.bars;bar++){const o=bar*n,cd=S.prog[bar%4],last=bar===sc.bars-1;
+   for(let s=0;s<n;s++){
+    for(const k in sc.drum)if(sc.drum[k][s])add(o+s,k,.9);
+    if(last&&(T==='verse'||T==='hook'||T==='build')&&s>=n-(T==='build'?8:4)&&!sc.drum.snare[s]&&R()<.8)add(o+s,'snare',.4+.5*(s%8)/8);
+    if(sc.drum.kick[s]&&(T==='verse'||T==='hook'||T==='outro')){let bm=28+S.key+SC[S.mode][cd];if(bm>43)bm-=12;add(o+s,'bass',bm,(T==='hook'?3:4)*sd)}
+    if(s===0&&T!=='verse')tri(cd).forEach(m=>add(o,'pad',m,n*sd*.98));
+    if((T==='verse'||T==='hook')&&[0,6,10].includes(s)&&s<n)tri(cd).forEach(m=>add(o+s,'keys',m,3*sd));
+    if(s===0){if(T==='hook'&&bar===0){add(o,'crash');add(o,'impact')}if(T==='break'&&bar===0)add(o,'impact');
+     if((T==='build'&&bar===sc.bars-2)||(T==='intro'&&last))add(o,'riser',(T==='build'?2:1)*n*sd)}}}
+  sc.mel.forEach(m=>add(m.s,'lead',m.m,m.d*sd,lv));
+  off+=sc.bars*n*sd}
+ e.sort((x,y)=>x.t-y.t);return{evs:e,len:off,starts:st}}
+function tick(){const now=actx.currentTime;
+ while(ei<evs.length&&t0+evs[ei].t<now+.15){const e=evs[ei++];try{V[e.f](t0+e.t,...e.a)}catch(x){console.error(x)}}
+ if(ei>=evs.length&&now>t0+len-.2){ei=0;t0+=len}
+ const p=(((now-t0)%len)+len)%len;let c=starts[0][1];starts.forEach(s=>{if(s[0]<=p)c=s[1]});
+ if(c!==hl){hl=c;song.secs.forEach((_,i)=>{const x=$('s'+i);if(x)x.classList.toggle('hl',i===c)});$('st').textContent='재생 중 · '+LBL[song.secs[c].type]}}
+async function start(a,b){stopAll();if(!song)gen();
+ actx=actx||new(window.AudioContext||window.webkitAudioContext)();await actx.resume();
+ ctx=actx;bus=mkBus(actx);nbuf=mkNoise(actx);rng=[a,b];const x=buildEvents(a,b);evs=x.evs;len=x.len;starts=x.starts;
+ ei=0;t0=actx.currentTime+.1;playing=true;hl=-1;sched=setInterval(tick,25);$('stop').disabled=false}
+function stopAll(){playing=false;clearInterval(sched);if(bus)try{bus.m.disconnect()}catch(e){}bus=null;
+ $('stop').disabled=true;if(song){song.secs.forEach((_,i)=>{const x=$('s'+i);if(x)x.classList.remove('hl')});$('st').textContent=''}}
+function resync(){if(!playing)return;const x=buildEvents(rng[0],rng[1]);evs=x.evs;len=x.len;starts=x.starts;
+ const p=actx.currentTime-t0;ei=evs.findIndex(e=>e.t>p+.2);if(ei<0)ei=evs.length}
+async function exportWav(){if(!song)return;const sr=44100,x=buildEvents(0,song.secs.length-1),N=Math.ceil((x.len+2.5)*sr),oc=new OfflineAudioContext(2,N,sr);
+ const sv=[ctx,bus,nbuf];ctx=oc;bus=mkBus(oc);nbuf=mkNoise(oc);x.evs.forEach(e=>V[e.f](.05+e.t,...e.a));[ctx,bus,nbuf]=sv;
+ const r=await oc.startRendering(),ch=[r.getChannelData(0),r.getChannelData(1)],bytes=44+N*4,buf=new ArrayBuffer(bytes),v=new DataView(buf);
+ const str=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+ str(0,'RIFF');v.setUint32(4,bytes-8,true);str(8,'WAVE');str(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);v.setUint32(24,sr,true);v.setUint32(28,sr*4,true);v.setUint16(32,4,true);v.setUint16(34,16,true);str(36,'data');v.setUint32(40,N*4,true);
+ let o=44;for(let i=0;i<N;i++)for(let c=0;c<2;c++){const s=Math.max(-1,Math.min(1,ch[c][i]));v.setInt16(o,s<0?s*32768:s*32767,true);o+=2}
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));a.download='beat-lab-song.wav';a.click();$('st').textContent='WAV 저장 완료'}
+
+/* ---------- UI ---------- */
+function renderAll(){
+ $('secs').innerHTML=song.secs.map((s,i)=>`<div class="sec ${i===sel?'on':''}" id="s${i}" onclick="pickSec(${i})"><b>${LBL[s.type]}</b><small>${s.bars}마디</small><span onclick="event.stopPropagation();start(${i},${i})">▶ 구간</span></div>`).join('');
+ grid();info()}
+function pickSec(i){sel=i;song.secs.forEach((_,j)=>{const x=$('s'+j);if(x)x.classList.toggle('on',j===i)});grid()}
+function grid(){const sc=song.secs[sel],n=song.spb;$('gl').textContent='· '+LBL[sc.type]+' (1마디 패턴)';
+ $('grid').innerHTML=ROWS.map(([k,l])=>`<div class="row"><strong>${l}</strong><div class="cells" style="grid-template-columns:repeat(${n},1fr)">${sc.drum[k].map((v,i)=>`<button class="c ${v?'on':''} ${i%4===0?'q':''}" data-r="${k}" data-i="${i}" aria-label="${l} ${i+1}"></button>`).join('')}</div></div>`).join('')}
+$('grid').onclick=e=>{const t=e.target;if(t.dataset&&t.dataset.r){const a=song.secs[sel].drum[t.dataset.r];a[t.dataset.i]^=1;t.classList.toggle('on');resync()}};
+function info(){const S=song,sd=60/S.bpm/4,tot=S.secs.reduce((a,s)=>a+s.bars*S.spb*sd,0);
+ $('info').innerHTML=`<span class="pill">${S.genre}</span><span class="pill">${S.bpm} BPM</span><span class="pill">${NN[S.key]} ${S.mode}</span><span class="pill">약 ${Math.round(tot)}초</span><br>코드: ${S.prog.map(cn).join(' → ')} (1마디씩 반복)`+
+ S.secs.map(s=>`<div class="trk"><b>${LBL[s.type]} ${s.bars}마디</b><br>${LAY[s.type]}<br>멜로디: ${s.mel.slice(0,8).map(x=>nm(x.m)).join(' ')} …</div>`).join('')}
+$('mx').innerHTML=MX.map(([k,l])=>`<div><label>${l}</label><input type="range" min="0" max="1" step=".05" value="${mix[k]}" oninput="setMix('${k}',this.value)"><label style="margin:6px 0 0"><input type="checkbox" style="width:auto" onchange="setMute('${k}',this.checked)"> 뮤트</label></div>`).join('');
+function applyMix(k){if(bus&&bus[k])bus[k].gain.value=mute[k]?0:mix[k]}
+function setMix(k,v){mix[k]=+v;applyMix(k)}function setMute(k,c){mute[k]=c;applyMix(k)}
+function compose(){const S=song,k=$('kw').value.split(/[,，\s]+/).filter(Boolean),kw=i=>k.length?k[i%k.length]:'밤',tp=$('topic').value.trim()||'성장',lg=$('lang').value;
+ const ko=`[Hook]\n${kw(0)}의 끝에서 ${tp}, 멈추지 않아\n${kw(1)}을 안고 더 높이 올라가\n${kw(2)}만 보고 달려, 흔들림 없이\n오늘의 나를 넘어 ${kw(3)}을 만들어\n\n[Verse]\n불 꺼진 거리 위에 계획을 새겨\n작은 시작이라도 끝까지 밀어\n말보다 결과로 내 이름을 증명해`;
+ const en=`[Hook]\nI came too far, I won’t fall back\nTurn every doubt into a track\nNo ceiling here, I’m built to rise\nI see the future in my eyes\n\n[Verse]\nMidnight city, got a plan in my head\nEvery little step puts a brick where I stand\nNo shortcuts, let the work speak loud\nQuiet ambition, never chasing the crowd`;
+ const h=S.secs.find(s=>s.type==='hook');
+ lastTxt=`TITLE: ${pick(['NO LIMITS','AFTER THE STORM','NEON CROWN','BUILT FROM NIGHT','RUN THE CITY'])}\n\nCONCEPT\n${tp} · ${S.genre}\n${NN[S.key]} ${S.mode} · ${S.bpm} BPM\n\nARRANGEMENT\n${S.secs.map(s=>LBL[s.type]+' '+s.bars).join(' → ')}\n\nCHORDS\n${S.prog.map(cn).join(' → ')}\n\nHOOK MELODY\n${h?h.mel.slice(0,10).map(x=>nm(x.m)).join(' '):'-'}\n\nLYRICS DRAFT\n${lg==='영어'?en:lg==='한국어'?ko:ko+'\n\n'+en}`;
+ $('cmpOut').textContent=lastTxt;$('cp').disabled=false}
+$('gen').onclick=gen;$('mel').onclick=regenMel;$('play').onclick=()=>start(0,song.secs.length-1);$('stop').onclick=stopAll;$('wav').onclick=exportWav;$('cmp').onclick=compose;
+$('cp').onclick=async()=>{try{await navigator.clipboard.writeText(lastTxt);$('cp').textContent='복사 완료 ✓'}catch(e){$('cp').textContent='복사 권한 없음'}};
+gen();
+</script></body></html>
