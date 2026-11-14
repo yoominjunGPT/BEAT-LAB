@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BEAT LAB STUDIO v05</title>
+<style>
+:root{--bg:#090812;--line:#393052;--txt:#f5f1ff;--muted:#aaa2c2;--pink:#ff4fd8;--cyan:#69e4ff;--green:#8dffbf;--cell:#0d0b18;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#30214c 0,transparent 42%),var(--bg);color:var(--txt);font-family:system-ui,-apple-system,sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+main{max-width:1000px;margin:auto;padding:22px 14px 60px}h1{font-size:clamp(26px,5vw,40px);margin:0 0 6px;letter-spacing:-1.5px}h1 span{color:var(--pink)}
+.sub,.hint{color:var(--muted);font-size:12px;line-height:1.65}h2{font-size:17px;margin:0 0 12px}
+.card{background:linear-gradient(145deg,#19162b,#11101d);border:1px solid var(--line);border-radius:18px;padding:17px;margin:13px 0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+input,select{width:100%;background:var(--cell);border:1px solid #393153;border-radius:11px;padding:10px;color:var(--txt);font:inherit}
+button{border:0;border-radius:12px;padding:11px 15px;background:linear-gradient(100deg,#ff4fd8,#8b65ff);color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+button.s{background:#292442;border:1px solid #4a416c}button:disabled{opacity:.45}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.out{background:var(--cell);border:1px solid #393153;border-radius:14px;padding:14px;margin-top:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
+.pill{display:inline-block;border:1px solid #4b416c;border-radius:99px;padding:4px 9px;font-size:11px;color:var(--cyan);margin:2px 4px 2px 0}
+.secs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.sec{flex:0 0 auto;min-width:92px;background:var(--cell);border:1px solid #393153;border-radius:13px;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.sec small{color:var(--muted);font-size:11px}.sec.on{border-color:var(--pink)}.sec.hl{background:#2a1f45}.sec span{color:var(--cyan);font-size:13px}
+.row{display:grid;grid-template-columns:58px 1fr;gap:6px;align-items:center;margin:5px 0}.row strong{font-size:12px}
+.cells{display:grid;gap:3px}.c{height:28px;padding:0;border-radius:6px;background:var(--cell);border:1px solid #393153}.c.q{border-left:2px solid #5a4d85}.c.on{background:var(--pink);border-color:var(--pink)}.c.gh{background:#7a3a82;border-color:#7a3a82}
+.mx{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.mx>div{background:var(--cell);border:1px solid #302946;border-radius:11px;padding:9px;font-size:12px}.mx input[type=range]{padding:0}
+.trk{padding:7px 0;border-bottom:1px solid #2b2543;font-size:12px}.trk:last-child{border:0}.trk b{color:var(--cyan)}
+.chk{display:flex;align-items:center;gap:8px;color:var(--txt);font-size:13px;margin:0;padding-top:26px}.chk input{width:auto}
+#st{color:var(--green);font-size:12px;margin-top:10px;min-height:16px}
+#bar{height:4px;background:#241f38;border-radius:4px;margin-top:10px;overflow:hidden}#bar i{display:block;height:100%;width:0;background:var(--pink)}
+@media(max-width:650px){.grid{grid-template-columns:1fr 1fr}.mx{grid-template-columns:1fr 1fr}}
+</style></head><body><main>
+<h1>BEAT LAB <span>STUDIO</span></h1>
+<p class="sub">분위기·길이를 고르면 매번 완전히 새로운 드럼 패턴, 베이스, 멜로디, 효과음으로 곡 구성을 만들어요. 스윙·휴머나이즈가 들어가 실제 힙합처럼 흘러갑니다.</p>
+
+<section class="card"><h2>곡 설정</h2><div class="grid">
+<div><label>장르 (BPM 자동 설정)</label><select id="genre"></select></div>
+<div><label>분위기</label><select id="mood"></select></div>
+<div><label>템포 (BPM)</label><input id="bpm" type="number" min="60" max="200" value="140"></div>
+<div><label>조성</label><select id="key"></select></div>
+<div><label>박자</label><select id="meter"><option value="4">4/4</option><option value="3">3/4 · 6/8 느낌</option></select></div>
+<div><label>원하는 길이 (초)</label><input id="dur" type="number" min="20" max="300" value="90"></div>
+<div><label>베이스</label><select id="bassSel"><option value="auto">분위기에 맞게 자동 판단</option><option value="sub">808 서브</option><option value="dist">디스토션 808</option><option value="reese">리즈 (어두운 톱니)</option><option value="soft">소프트 사인</option></select></div>
+<div><label>멜로디 악기</label><select id="lv"><option value="auto">분위기·구간별 자동</option><option value="synth">신스 리드</option><option value="piano">피아노</option><option value="bell">벨</option><option value="pluck">플럭</option><option value="choir">보이스 패드</option></select></div>
+<div><label class="chk"><input type="checkbox" id="gaps" checked> 집중용 공백(멈춤) 넣기</label></div>
+</div>
+<div class="act"><button id="gen">✦ 곡 전체 새로 만들기</button><button class="s" id="mel">🎹 멜로디만 다시</button><button class="s" id="drm">🥁 드럼만 다시</button></div></section>
+
+<section class="card"><h2>구간별 비트 · 멜로디</h2>
+<p class="hint">구간을 누르면 아래 시퀀서에서 편집하고, ▶로 그 구간만 반복 재생해요.</p>
+<div class="secs" id="secs"></div>
+<div class="act"><button id="play">▶ 전체 미리 듣기</button><button class="s" id="stop" disabled>■ 정지</button><button class="s" id="wav">↓ WAV 저장</button></div>
+<div id="bar"><i id="barI"></i></div><div id="st" aria-live="polite"></div><div id="info" class="out"></div></section>
+
+<section class="card"><h2>스텝 시퀀서 <span class="hint" id="gl"></span></h2>
+<p class="hint">칸을 눌러 켜고(밝게) → 고스트(어둡게) → 끄기 순으로 바뀌어요. 선택한 구간의 모든 마디에 적용되고 재생 중에도 반영됩니다.</p><div id="grid"></div></section>
+
+<section class="card"><h2>믹서</h2><div class="mx" id="mx"></div></section>
+
+<section class="card"><h2>가사 · 곡 설계</h2><div class="grid">
+<div><label>곡 주제</label><input id="topic" value="자신감, 한계를 넘어 성공하기"></div>
+<div><label>가사 언어</label><select id="lang"><option>한국어</option><option selected>영어</option><option>한영 혼합</option></select></div>
+<div><label>키워드</label><input id="kw" value="밤, 야망, 집중, 승리"></div></div>
+<div class="act"><button id="cmp">✦ 곡 설계서 만들기</button><button class="s" id="cp" disabled>복사</button></div>
+<div id="cmpOut" class="out">현재 곡의 코드, 구성, 멜로디를 바탕으로 설계서와 가사 초안을 만듭니다.</div></section>
+<p class="hint">브라우저 안에서만 동작하는 창작 보조 도구예요. 결과는 편집해서 발전시킬 초안입니다.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let rnd=Math.random;
+const pk=a=>a[Math.floor(rnd()*a.length)],ri=(a,b)=>a+Math.floor(rnd()*(b-a+1)),cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const NN=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const SC={minor:[0,2,3,5,7,8,10],major:[0,2,4,5,7,9,11],phryg:[0,1,3,5,7,8,10],dorian:[0,2,3,5,7,9,10],harm:[0,2,3,5,7,8,11]};
+const SCN={minor:'minor',major:'major',phryg:'phrygian',dorian:'dorian',harm:'harmonic minor'};
+const mtof=m=>440*2**((m-69)/12),nm=m=>NN[((m%12)+12)%12]+(Math.floor(m/12)-1);
+/* 장르: b=BPM, sn=스네어 후보, kk=킥 후보, sw=스윙, h=하이햇 밀도, roll=롤 확률, gh=고스트 확률 */
+const G={
+'Trap':{b:140,sn:[[8]],kk:[3,6,7,10,11,14],sw:.02,h:.8,roll:.5,gh:.12},
+'Dark Trap':{b:136,sn:[[8]],kk:[3,7,10,11,13,15],sw:.03,h:.6,roll:.4,gh:.1},
+'Drill':{b:144,sn:[[8],[8],[10]],kk:[3,7,10,11,13],sw:0,h:.7,roll:.6,gh:.1},
+'Boom Bap':{b:90,sn:[[4,12]],kk:[2,3,6,7,9,10,11,14],sw:.2,h:.5,roll:0,gh:.4},
+'Lo-fi Hip Hop':{b:78,sn:[[4,12]],kk:[2,6,9,10,11,14],sw:.24,h:.5,roll:0,gh:.35},
+'Phonk':{b:130,sn:[[4,12],[8]],kk:[3,6,7,10,11,14],sw:.02,h:.7,roll:.3,gh:.2},
+'Rage':{b:150,sn:[[8]],kk:[3,6,7,10,11,13,15],sw:0,h:.9,roll:.6,gh:.1},
+'Jersey Club':{b:140,sn:[[4,12]],kk:[3,6,10,12,14],sw:0,h:.6,roll:.2,gh:.1},
+'UK Garage':{b:132,sn:[[4,12]],kk:[2,6,10,11],sw:.13,h:.6,roll:0,gh:.3},
+'R&B Trap':{b:120,sn:[[8]],kk:[3,7,10,11,14],sw:.08,h:.5,roll:.2,gh:.2},
+'Cloud Rap':{b:130,sn:[[8]],kk:[3,7,10,14],sw:.05,h:.4,roll:.3,gh:.15}};
+/* 분위기: 사운드 팔레트와 작곡 성향 */
+const PR={dark:[[0,0,5,4],[0,1,0,6],[0,5,0,6],[0,0,3,4],[0,6,5,6],[0,0,1,0],[0,5,6,0]],
+ sad:[[0,5,2,6],[0,2,5,6],[0,3,6,4],[0,5,3,6]],
+ aggro:[[0,0,6,5],[0,1,0,6],[0,5,6,4],[0,0,5,6]],
+ dream:[[0,2,5,6],[0,4,5,3],[0,5,3,6],[0,2,3,6]],
+ chill:[[0,3,5,4],[0,5,3,4],[0,2,3,4],[0,3,6,4]],
+ hype:[[0,6,5,6],[0,5,2,6],[0,3,5,4],[0,4,5,3]]};
+const PRMAJ=[[0,4,5,3],[0,5,3,4],[0,3,4,3],[0,3,0,4]];
+const MOODS={
+ dark:{n:'어두운 · 다크',sc:['minor','phryg','minor','harm'],dens:.5,sw:.04,bass:['dist','sub','reese'],lead:['bell','choir','piano'],pad:'dark',keys:'rhodes',kick:['deep','hard'],rev:2.6,vinyl:.5,gen:[0,0,1,3,4,5,6],
+  fx:['subdrop','whisper','revcrash','tapestop','bellhit'],nt:'어둡고 묵직한 베이스, 성긴 멜로디, 공간감 있는 잔향'},
+ sad:{n:'슬픈 · 감성',sc:['minor','minor','dorian'],dens:.55,sw:.08,bass:['sub','soft'],lead:['piano','bell','pluck'],pad:'warm',keys:'rhodes',kick:['soft','deep'],rev:2.2,vinyl:.4,gen:[0,2,3,4,5,6],
+  fx:['revcrash','tapestop','whisper','bellhit'],nt:'부드러운 서브 베이스와 피아노 중심의 감성적 구성'},
+ aggro:{n:'공격적 · 하드',sc:['phryg','minor','harm'],dens:.8,sw:0,bass:['dist','reese'],lead:['synth','pluck','bell'],pad:'dark',keys:'pluck',kick:['hard','hard','deep'],rev:1.3,vinyl:0,gen:[0,0,1,5,6],
+  fx:['impact','subdrop','revcrash','whisper'],nt:'강한 디스토션 808과 촘촘한 하이햇, 짧은 리버브'},
+ dream:{n:'몽환 · 에테리얼',sc:['dorian','minor','dorian'],dens:.5,sw:.06,bass:['soft','sub'],lead:['choir','bell','synth'],pad:'air',keys:'rhodes',kick:['soft','deep'],rev:3.4,vinyl:.2,gen:[0,2,3,4,5,6],
+  fx:['whisper','revcrash','bellhit','tapestop'],nt:'넓은 보이스 패드와 긴 잔향, 부드러운 서브'},
+ chill:{n:'차분 · 로파이',sc:['dorian','minor','minor'],dens:.55,sw:.2,bass:['soft','sub'],lead:['piano','pluck','bell'],pad:'warm',keys:'rhodes',kick:['soft'],rev:1.8,vinyl:.8,gen:[0,2,3,4,5],
+  fx:['tapestop','revcrash','bellhit'],nt:'바이닐 노이즈와 부드러운 킥, 스윙감 있는 루프'},
+ hype:{n:'신나는 · 에너지',sc:['major','dorian','minor'],dens:1,sw:0,bass:['sub','dist'],lead:['synth','pluck','bell'],pad:'bright',keys:'pluck',kick:['hard','deep'],rev:1.2,vinyl:0,gen:[0,3,4,5,6],maj:1,
+  fx:['impact','revcrash','subdrop'],nt:'밝은 신스와 탄탄한 킥으로 에너지를 끌어올리는 구성'}};
+const FORMS={tiny:[['intro',1],['hook',2],['outro',1]],short:[['intro',1],['verse',2],['hook',2],['outro',1]],
+ std:[['intro',1],['verse',3],['build',1],['hook',3],['break',1],['hook',3],['outro',1]],
+ long:[['intro',1.5],['verse',3],['build',1],['hook',3],['break',1.5],['verse',2.5],['build',1],['hook',3.5],['outro',1.5]]};
+const LBL={intro:'도입',verse:'전개',build:'빌드업',hook:'하이라이트',break:'브레이크',outro:'마무리'};
+const LAY={intro:'공간감 있는 패드 · 최소한의 비트 · 벨/효과음',verse:'킥·스네어·하이햇 · 베이스 · 키 스탭 · 절제된 멜로디',build:'스네어 롤 · 하이햇 가속 · 라이저 · 상승 멜로디',hook:'풀 드럼 · 하이햇 롤 · 베이스 · 패드 · 리드 · 임팩트',break:'드럼 최소화 · 패드 · 드론 베이스 · 벨',outro:'킥 · 패드 · 하강 멜로디 · 여운'};
+const ROWS=[['kick','킥'],['snare','스네어'],['clap','클랩'],['hat','하이햇'],['ohat','오픈햇'],['perc','퍼커션']];
+const MX=[['kick','킥'],['snare','스네어/클랩'],['hat','하이햇'],['bass','베이스'],['chord','코드/패드'],['lead','멜로디'],['fx','효과']];
+const BN={sub:'808 서브',dist:'디스토션 808',reese:'리즈 베이스',soft:'소프트 사인 베이스'},LN={synth:'신스 리드',piano:'피아노',bell:'벨',pluck:'플럭',choir:'보이스 패드'};
+const mix={kick:.9,snare:.8,hat:.5,bass:.9,chord:.6,lead:.7,fx:.6},mute={};
+let actx,ctx,bus,nbuf,song,sel=0,playing=false,sched,evs=[],ei=0,t0=0,len=0,rng=[0,0],starts=[],hl=-1,lastTxt='',loopMode=false;
+$('genre').innerHTML=Object.keys(G).map(g=>`<option>${g}</option>`).join('');
+$('mood').innerHTML=Object.entries(MOODS).map(([k,m])=>`<option value="${k}">${m.n}</option>`).join('');$('mood').value='dark';
+$('key').innerHTML=NN.flatMap((n,i)=>['minor','major'].map(m=>`<option value="${i},${m}">${n} ${m}</option>`)).join('');$('key').value='5,minor';
+$('genre').onchange=()=>{$('bpm').value=G[$('genre').value].b};$('genre').value='Trap';
+
+/* ---------- 작곡 ---------- */
+const dm=d=>55+song.key+song.scl[((d%7)+7)%7]+12*Math.floor(d/7);
+const tri=(d,sev)=>[0,2,4].concat(sev?[6]:[]).map(j=>dm(d+j));
+const cn=d=>{const S=song,r=(S.key+S.scl[d%7])%12,t=(S.scl[(d+2)%7]-S.scl[d%7]+12)%12,f=(S.scl[(d+4)%7]-S.scl[d%7]+12)%12;return NN[r]+(t===3?'m':'')+(f===6?'dim':'')};
+function mkDNA(g,M,n){
+ let kk=n===16?g.kk:[3,5,7,9,10];kk=shuf(kk).slice(0,Math.max(3,kk.length-ri(0,2)));
+ return{sn:n===16?pk(g.sn):[6],kk,he:rnd()<g.h*M.dens+.1?1:2,roll:g.roll*(.5+M.dens*.7),gh:g.gh,
+  kt:pk(M.kick),st:pk(['snap','rim','fat','tight']),pt:pk(['rim','shk','tom','click']),hz:ri(7000,10500),sw:Math.max(g.sw,M.sw)*(.8+rnd()*.5)}}
+function genDrums(T,dna,M,n){
+ const z=()=>Array(n).fill(0),d={kick:z(),snare:z(),clap:z(),hat:z(),ohat:z(),perc:z()};
+ const lv={intro:.25,verse:.7,build:.5,hook:1,break:.12,outro:.3}[T],dn=M.dens,S=dna.sn,off=n===16?[3,5,7,9,11,13,15]:[1,3,5,7,9,11];
+ const kicks=c=>shuf(dna.kk).filter(i=>i<n&&!S.includes(i)&&!S.includes(i+1)).slice(0,c).forEach(i=>d.kick[i]=1);
+ const hats=(e,p,rp)=>{for(let i=0;i<n;i+=e)if(rnd()<p)d.hat[i]=(e===1&&i%2&&rnd()<.55)?2:1;
+  if(rnd()<rp){const s=pk(n===16?[6,7,11,13,14,15]:[5,8,10,11]);d.hat[s]=3;if(rnd()<.3&&s+2<n)d.hat[s+2]=3}};
+ const perc=p=>{if(rnd()<p)shuf(off).slice(0,ri(1,3)).forEach(i=>d.perc[i]=rnd()<.7?1:2)};
+ const ghost=()=>{if(rnd()<dna.gh*lv)shuf(off).filter(i=>!d.kick[i]&&!d.snare[i]).slice(0,ri(1,2)).forEach(i=>d.snare[i]=2);
+  if(rnd()<dna.gh*lv)shuf(off).filter(i=>!d.kick[i]&&!d.snare[i]).slice(0,1).forEach(i=>d.kick[i]=2)};
+ if(T==='intro'){d.kick[0]=rnd()<.6?1:0;if(rnd()<.3)kicks(1);if(rnd()<.55)hats(4,.9,0);perc(.4)}
+ else if(T==='verse'){d.kick[0]=rnd()<.95?1:0;kicks(ri(1,1+Math.round(dn*2)));S.forEach(i=>d.snare[i]=1);if(rnd()<.25)S.forEach(i=>d.clap[i]=1);
+  hats(dna.he===1&&rnd()<.5?2:dna.he,.85,dna.roll*.5);if(rnd()<.3)d.ohat[n-2]=1;perc(.45);ghost()}
+ else if(T==='build'){d.kick[0]=rnd()<.5?1:0;hats(1,.8,0);perc(.3)}
+ else if(T==='hook'){d.kick[0]=1;kicks(ri(2,2+Math.round(dn*2.5)));S.forEach(i=>{d.snare[i]=1;if(rnd()<.85)d.clap[i]=1});
+  hats(dna.he===2&&rnd()<.3?1:dna.he,.92,dna.roll);if(rnd()<.6)d.ohat[pk(n===16?[6,14,15]:[10])]=1;perc(.55);ghost()}
+ else if(T==='break'){if(rnd()<.5)d.kick[0]=1;perc(.5);if(rnd()<.25)hats(4,.8,0)}
+ else{d.kick[0]=1;hats(4,.8,0);perc(.3)}
+ return d}
+function mkMotif(n,dn){
+ const cand=n===16?[0,2,3,4,6,7,8,10,11,12,14]:[0,2,3,4,6,8,9,10];
+ const bar=()=>{const cnt=dn<.7?ri(2,3):ri(3,5);let ps=shuf(cand.slice(1)).slice(0,cnt-1);ps.push(rnd()<.75?0:pk(cand.slice(1,4)));
+  ps=[...new Set(ps)].sort((a,b)=>a-b);let c=pk([0,0,2,4]);return ps.map(s=>{c=cl(c+pk([-2,-1,-1,0,1,1,2,-3,3]),-4,5);return[s,c]})};
+ const A=bar(),B=bar(),end=(a,v)=>a.map((x,i)=>i===a.length-1?[x[0],v]:x);
+ return[A,end(A,cl(A[A.length-1][1]+pk([-2,-1,1,2]),-4,5)),B,end(A,pk([0,-3,0,2]))]}
+const TONES=[-5,-3,0,2,4,7];
+function genMel(sc){const S=song,n=S.spb,M=MOODS[S.mood],out=[],T=sc.type;
+ const hi=T==='hook'?(['dark','sad','chill'].includes(S.mood)?0:7):(T==='build'&&S.mood!=='dark'?7:0);
+ for(let b=0;b<sc.bars;b++){const cd=S.prog[b%4],base=b*n;
+  if(T==='build'){const st=M.dens<.7?4:2;for(let s=0;s<n;s+=st)out.push({s:base+s,m:dm(cd+[0,2,4,7][(s/st)%4]+hi+(b>=sc.bars-2?2:0)),d:st,v:.5+.45*b/sc.bars});continue}
+  if(T==='break'){if(rnd()<.85)out.push({s:base,m:dm(cd+[0,2,4][b%3]+7),d:n-2,v:.5});continue}
+  if(T==='intro'&&b%2===0)continue;
+  let ns=S.motif[b%4].filter(x=>x[0]<n);
+  if(T==='intro'||T==='outro')ns=ns.slice(0,2);else if(T==='verse'&&b%2)ns=ns.slice(0,Math.max(2,ns.length-1));
+  ns.forEach(([s,c],j)=>{const strong=s%4===0,cc=strong?TONES.reduce((a,x)=>Math.abs(x-c)<Math.abs(a-c)?x:a):c,
+   nx=ns[j+1]?ns[j+1][0]:n,dd=Math.max(1,Math.min(nx-s-(rnd()<.35?1:0),j===ns.length-1?4:6));
+   out.push({s:base+s,m:dm(cd+hi+cc-(T==='outro'?b%4:0)),d:dd,v:(T==='hook'?.85:.62)*(strong?1:.85)})})}
+ sc.mel=out}
+function mkForm(B){
+ const tpl=B<12?FORMS.tiny:B<20?FORMS.short:B<36?FORMS.std:FORMS.long,tot=B-(B%2),W=tpl.reduce((a,x)=>a+x[1],0);
+ const bs=tpl.map(x=>Math.max(2,Math.round(tot*x[1]/W/2)*2));let diff=tot-bs.reduce((a,b)=>a+b,0),g=0;
+ while(diff!==0&&g++<100){const i=bs.indexOf(Math.max(...bs)),st=diff>0?2:-2;if(bs[i]+st<2)break;bs[i]+=st;diff-=st}
+ return tpl.map((x,i)=>[x[0],bs[i]])}
+function mkGaps(){const n=song.spb;song.secs.forEach((sc,i)=>{sc.gap=null;if(!$('gaps').checked||sc.bars<2)return;
+ const nx=song.secs[i+1],last=sc.bars-1;
+ if(sc.type==='build'&&rnd()<.7)sc.gap={bar:last,from:n-(n===16?ri(3,6):ri(3,4)),to:n};
+ else if(sc.type==='verse'&&nx&&nx.type==='hook'&&rnd()<.3)sc.gap={bar:last,from:n-4,to:n};
+ else if(sc.type==='break'&&rnd()<.4)sc.gap={bar:last,from:0,to:n};
+ else if(sc.type==='hook'&&nx&&nx.type==='break'&&rnd()<.5)sc.gap={bar:last,from:n-2,to:n}})}
+function judge(M){const notes=[],bpm=song.bpm,bs=$('bassSel').value,ls=$('lv').value;
+ let bass=bs;
+ if(bs==='auto'){const ok=M.bass.filter(b=>!(b==='reese'&&bpm<100));bass=pk(ok);notes.push(`베이스: ${BN[bass]} — ${M.n.split(' ')[0]} 분위기에 어울려 선택`)}
+ else notes.push(`베이스: ${BN[bass]} (직접 선택)`);
+ if(bs==='auto'&&bass==='sub'&&M.bass.includes('dist')&&rnd()<.4){song.hookBass='dist';notes.push('하이라이트에서는 디스토션 808로 교체해 힘을 줌')}
+ let lv,lh;
+ if(ls==='auto'){lv=pk(M.lead);lh=pk(M.lead.filter(x=>x!==lv));notes.push(`멜로디: 전개 ${LN[lv]} · 하이라이트 ${LN[lh]}`)}
+ else{lv=lh=ls;notes.push(`멜로디: ${LN[ls]} (직접 선택)`)}
+ song.bass=bass;song.leadV=lv;song.leadH=lh;
+ song.fx=shuf(M.fx).slice(0,3);notes.push('효과음: '+song.fx.map(f=>({subdrop:'서브 드롭',whisper:'속삭임 노이즈',revcrash:'리버스 심벌',tapestop:'테이프 스톱',bellhit:'유령 벨',impact:'임팩트'}[f])).join(' · '));
+ song.notes=notes}
+function gen1(){
+ const seed=(Math.random()*2**31)|0;rnd=mulberry(seed);
+ const genre=$('genre').value,g=G[genre],mood=$('mood').value,M=MOODS[mood],[k,km]=$('key').value.split(','),spb=+$('meter').value===4?16:12;
+ const scn=(M.maj&&km==='major')?'major':pk(M.sc),bpm=cl(+$('bpm').value||140,60,200),sd=60/bpm/4;
+ let prog;if(rnd()<.35){const a=rnd()<.8?0:pk(M.gen),b=pk(M.gen),c=pk(M.gen),d=pk(M.gen);prog=rnd()<.4?[a,b,a,b]:[a,b,c,d]}else prog=pk(scn==='major'?PRMAJ:PR[mood]);
+ const dna=mkDNA(g,M,spb),B=cl(Math.round((+$('dur').value||90)/(spb*sd)),4,200);
+ song={seed,genre,mood,bpm,key:+k,mode:scn,scl:SC[scn],spb,prog,sev:rnd()<(['sad','dream','chill'].includes(mood)?.6:mood==='dark'?.3:0),dna,motif:mkMotif(spb,M.dens),hookBass:null};
+ judge(M);
+ song.secs=mkForm(B).map(([type,bars])=>({type,bars,drum:genDrums(type,dna,M,spb)}));
+ song.secs.forEach((sc,i)=>{const pv=song.secs.slice(0,i).find(x=>x.type===sc.type);
+  if(pv&&sc.type!=='intro'&&rnd()<.75){sc.drum=JSON.parse(JSON.stringify(pv.drum));const h=sc.drum.hat,e=h.map((v,j)=>v?-1:j).filter(j=>j>=0);if(e.length&&rnd()<.6)h[pk(e)]=2;if(rnd()<.4&&sc.type==='hook')sc.drum.perc[pk([3,7,11,15].filter(x=>x<spb))]=1}});
+ mkGaps();song.secs.forEach(genMel)}
+function regenMel(){if(!song)return;rnd=mulberry((Math.random()*2**31)|0);song.motif=mkMotif(song.spb,MOODS[song.mood].dens);song.secs.forEach(genMel);info();resync()}
+function regenDrums(){if(!song)return;rnd=mulberry((Math.random()*2**31)|0);const M=MOODS[song.mood];song.dna=mkDNA(G[song.genre],M,song.spb);song.seed=(Math.random()*2**31)|0;
+ song.secs.forEach(sc=>sc.drum=genDrums(sc.type,song.dna,M,song.spb));grid();info();resync()}
+
+/* ---------- 사운드 ---------- */
+function mkBus(c){const M=MOODS[song.mood],m=c.createGain(),sat=c.createWaveShaper(),cp=c.createDynamicsCompressor(),rv=c.createConvolver(),rg=c.createGain(),b={m,src:[]};
+ m.gain.value=.5;cp.threshold.value=-16;cp.ratio.value=5;cp.attack.value=.005;cp.release.value=.15;
+ const cv=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/512-1;cv[i]=Math.tanh(x*1.5)/Math.tanh(1.5)}sat.curve=cv;
+ const n=Math.floor(c.sampleRate*Math.min(3.4,M.rev)),ir=c.createBuffer(2,n,c.sampleRate);
+ for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);let p=0;for(let i=0;i<n;i++){p=p*.55+(Math.random()*2-1)*.45;d[i]=p*Math.pow(1-i/n,2.6)}}
+ rv.buffer=ir;rg.gain.value=.3;rv.connect(rg);rg.connect(m);m.connect(sat);sat.connect(cp);cp.connect(c.destination);
+ const dl=c.createDelay(1.5),fb=c.createGain(),lp=c.createBiquadFilter(),ds=c.createGain();
+ dl.delayTime.value=Math.min(1.4,60/song.bpm*.75);fb.gain.value=.4;lp.type='lowpass';lp.frequency.value=2200;ds.gain.value=.3;
+ ds.connect(dl);dl.connect(lp);lp.connect(fb);fb.connect(dl);lp.connect(m);b.dsend=ds;
+ for(const k in mix){const g=c.createGain();g.gain.value=mute[k]?0:mix[k];g.connect(m);if(['chord','lead','fx','snare'].includes(k))g.connect(rv);if(k==='lead')g.connect(ds);b[k]=g}
+ const ws=c.createWaveShaper(),wc=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/512-1;wc[i]=Math.tanh(x*4)*.8}ws.curve=wc;ws.connect(b.bass);b.ws=ws;
+ if(M.vinyl>0){const cb=c.createBuffer(1,c.sampleRate*4,c.sampleRate),d=cb.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()<.0007?(Math.random()*2-1)*.9:0)+(Math.random()*2-1)*.02;
+  const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();s.buffer=cb;s.loop=true;f.type='highpass';f.frequency.value=900;g.gain.value=M.vinyl*.22;
+  s.connect(f);f.connect(g);g.connect(m);s.start(0);b.src.push(s)}
+ b.stop=()=>b.src.forEach(s=>{try{s.stop()}catch(e){}});return b}
+function mkNoise(c){const b=c.createBuffer(1,c.sampleRate*2,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
+function osc(t,f,d,type,v,out,a=.005,f2,cut,det=0){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);o.detune.value=det;
+ if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+Math.min(d*.4,.12));
+ g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(v,.0002),t+a);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+ if(cut){const l=ctx.createBiquadFilter();l.type='lowpass';l.frequency.value=cut;o.connect(l);l.connect(g)}else o.connect(g);
+ g.connect(out);o.start(t);o.stop(t+d+.05)}
+function noi(t,d,v,out,type='highpass',fq=7000,q=1){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();
+ s.buffer=nbuf;s.loop=true;f.type=type;f.frequency.value=fq;f.Q.value=q;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+ s.connect(f);f.connect(g);g.connect(out);s.start(t,Math.random()*1.5);s.stop(t+d+.02)}
+function swell(t,d,v,out,type,f0,f1,q,rise){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=nbuf;s.loop=true;f.type=type;f.Q.value=q;
+ f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(f1,t+d);g.gain.setValueAtTime(.0001,t);
+ if(rise){g.gain.exponentialRampToValueAtTime(v,t+d*.97);g.gain.linearRampToValueAtTime(0,t+d)}else{g.gain.exponentialRampToValueAtTime(v,t+d*.4);g.gain.exponentialRampToValueAtTime(.0001,t+d)}
+ s.connect(f);f.connect(g);g.connect(out);s.start(t,Math.random()*1.5);s.stop(t+d+.05)}
+function sustain(t,d,v,a,r,out){const g=ctx.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.setValueAtTime(v,t+Math.max(a,d-r));g.gain.linearRampToValueAtTime(.0001,t+d+.02);g.connect(out);return g}
+const V={
+ kick:(t,v=1)=>{const k=song.dna.kt;
+  if(k==='hard'){osc(t,210,.34,'sine',.95*v,bus.kick,.002,50);noi(t,.012,.25*v,bus.kick,'highpass',3000)}
+  else if(k==='soft'){osc(t,100,.5,'sine',.9*v,bus.kick,.004,44,400)}
+  else{osc(t,140,.5,'sine',.95*v,bus.kick,.002,40);noi(t,.01,.12*v,bus.kick,'highpass',2500)}},
+ snare:(t,v=1)=>{const k=song.dna.st;
+  if(k==='rim'){noi(t,.07,.5*v,bus.snare,'bandpass',2200,2);osc(t,420,.05,'square',.12*v,bus.snare,.001)}
+  else if(k==='fat'){noi(t,.26,.45*v,bus.snare,'bandpass',1300);osc(t,170,.15,'triangle',.4*v,bus.snare,.002)}
+  else if(k==='tight'){noi(t,.1,.5*v,bus.snare,'highpass',2500);osc(t,220,.06,'triangle',.3*v,bus.snare,.002)}
+  else{noi(t,.17,.5*v,bus.snare,'highpass',1600);osc(t,195,.1,'triangle',.35*v,bus.snare,.002)}},
+ clap:(t,v=1)=>[0,.011,.023].forEach((x,i)=>noi(t+x,i===2?.14:.05,.3*v,bus.snare,'bandpass',1700,1.5)),
+ hat:(t,v=1)=>noi(t,.035+.02*v,.26*v,bus.hat,'highpass',song.dna.hz),
+ ohat:(t,v=1)=>noi(t,.24,.2*v,bus.hat,'highpass',song.dna.hz-800),
+ perc:(t,v=1)=>{const k=song.dna.pt;
+  if(k==='rim')osc(t,820,.04,'square',.09*v,bus.hat,.001,0,3000);
+  else if(k==='shk')noi(t,.07,.18*v,bus.hat,'bandpass',6500,1.5);
+  else if(k==='tom')osc(t,230,.2,'sine',.3*v,bus.hat,.002,120);
+  else osc(t,1700,.02,'sine',.12*v,bus.hat,.001)},
+ crash:t=>noi(t,1.4,.28,bus.fx,'highpass',5000),
+ impact:t=>{osc(t,95,1,'sine',.85,bus.fx,.003,30);noi(t,.7,.3,bus.fx,'lowpass',900)},
+ riser:(t,d)=>swell(t,d,.3,bus.fx,'bandpass',400,9000,2,true),
+ revcrash:(t,d)=>swell(t,d,.28,bus.fx,'highpass',2500,7000,.8,true),
+ subdrop:t=>{osc(t,75,1.5,'sine',.85,bus.fx,.01,26);noi(t,.3,.08,bus.fx,'lowpass',400)},
+ tapestop:(t,m)=>{const f=mtof(m),o=ctx.createOscillator(),l=ctx.createBiquadFilter(),g=ctx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f,t);
+  o.frequency.exponentialRampToValueAtTime(f/10,t+1.1);l.type='lowpass';l.frequency.setValueAtTime(1800,t);l.frequency.exponentialRampToValueAtTime(120,t+1.1);
+  g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.09,t+.02);g.gain.linearRampToValueAtTime(0,t+1.15);o.connect(l);l.connect(g);g.connect(bus.fx);o.start(t);o.stop(t+1.2)},
+ whisper:(t,d)=>swell(t,d,.1,bus.fx,'bandpass',1500,900,9,false),
+ bellhit:(t,m)=>{const f=mtof(m);osc(t,f,2.4,'sine',.14,bus.fx,.003);osc(t,f*2.76,1.4,'sine',.06,bus.fx,.002);osc(t,f*5.4,.6,'sine',.03,bus.fx,.002)},
+ bass:(t,m,d,ty,to,v=1)=>{const f=mtof(m),o=bus.bass,dist=ty==='dist',g=sustain(t,d,(dist?.35:.9)*v,ty==='soft'?.025:.006,.1,dist?bus.ws:o),os=ctx.createOscillator();
+  os.type='sine';os.frequency.setValueAtTime(ty==='soft'?f:f*1.7,t);os.frequency.exponentialRampToValueAtTime(f,t+.05);
+  if(to){os.frequency.setValueAtTime(f,t+d*.55);os.frequency.exponentialRampToValueAtTime(mtof(to),t+d)}
+  os.connect(g);os.start(t);os.stop(t+d+.05);
+  if(ty==='reese'){[-9,9].forEach(c=>{const s=ctx.createOscillator(),l=ctx.createBiquadFilter();s.type='sawtooth';s.frequency.value=f*2;s.detune.value=c;l.type='lowpass';l.frequency.value=480;
+   const gg=sustain(t,d,.16*v,.02,.1,o);s.connect(l);l.connect(gg);s.start(t);s.stop(t+d+.05)})}
+  else if(ty!=='soft'){osc(t,f*2,Math.min(d,.4),'triangle',.1*v,o,.004)}},
+ keys:(t,m,d,k)=>{const f=mtof(m);
+  if(k==='pluck')osc(t,f,Math.max(.3,d),'sawtooth',.07,bus.chord,.003,0,1800);
+  else{osc(t,f,d*1.8,'sine',.13,bus.chord,.004);osc(t,f*2,d*.6,'sine',.05,bus.chord,.002);osc(t,f*4.02,.12,'sine',.02,bus.chord,.001)}},
+ pad:(t,m,d,k,v=1)=>{const f=mtof(m),l=ctx.createBiquadFilter(),g=sustain(t,d,.055*v,k==='bright'?.08:.4,.5,bus.chord);l.type='lowpass';
+  if(k==='dark'){l.frequency.setValueAtTime(380,t);l.frequency.linearRampToValueAtTime(900,t+d*.8)}else l.frequency.value=k==='bright'?2600:k==='air'?1800:1100;
+  const ty=k==='air'?['triangle','sine']:['sawtooth','sawtooth'];
+  [-8,8].forEach((c,i)=>{const o=ctx.createOscillator();o.type=ty[i];o.frequency.value=f;o.detune.value=c;o.connect(l);o.start(t);o.stop(t+d+.1)});l.connect(g)},
+ lead:(t,m,d,k,v=1)=>{const f=mtof(m),o=bus.lead;
+  if(k==='bell'){osc(t,f,d*2.4+.4,'sine',.2*v,o,.004);osc(t,f*3.01,d*1.2+.2,'sine',.07*v,o,.002)}
+  else if(k==='piano'){osc(t,f,d*1.7+.3,'triangle',.2*v,o,.004);osc(t,f*2,d*.9+.2,'sine',.06*v,o,.003);osc(t,f*3,.15,'sine',.03*v,o,.001)}
+  else if(k==='pluck')osc(t,f,Math.max(d,.22),'sawtooth',.12*v,o,.003,0,2200);
+  else if(k==='choir'){const dd=Math.max(d,.5),g=sustain(t,dd,.16*v,.12,.3,o),lf=ctx.createOscillator(),lg=ctx.createGain();lf.frequency.value=5;lg.gain.value=7;lf.connect(lg);lf.start(t);lf.stop(t+dd+.05);
+   [[600,5],[1050,4]].forEach(([fq,q])=>{const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=fq;bp.Q.value=q;bp.connect(g);
+    [-10,0,10].forEach(c=>{const s=ctx.createOscillator();s.type='sawtooth';s.frequency.value=f;s.detune.value=c;lg.connect(s.detune);s.connect(bp);s.start(t);s.stop(t+dd+.05)})})}
+  else{osc(t,f,d*1.1+.1,'sawtooth',.13*v,o,.01,0,2600);osc(t,f*1.005,d*1.1+.1,'square',.05*v,o,.01,0,1800)}}
+};
+
+/* ---------- 이벤트 생성 (결정적 · 휴머나이즈 · 스윙) ---------- */
+function buildEvents(a,b){const S=song,M=MOODS[S.mood],sd=60/S.bpm/4,n=S.spb,sw=S.dna.sw,e=[],st=[];let off=0;
+ for(let i=a;i<=b;i++){const sc=S.secs[i],T=sc.type,rs=mulberry(S.seed+i*131+5),nx=S.secs[i+1]&&S.secs[i+1].type;st.push([off,i]);
+  const at=s=>off+s*sd+(Math.floor(s)%2?sw*sd:0);
+  let rb=Math.random;
+  const gp=(bar,s)=>sc.gap&&bar===sc.gap.bar&&s>=sc.gap.from&&s<sc.gap.to;
+  const add=(bar,s,f,args,hj=0,keep=false)=>{if(!keep&&gp(bar,s))return;e.push({t:Math.max(0,at(bar*n+s)+(rb()-.5)*2*hj/1000),f,a:args})};
+  const bt=(T==='hook'&&S.hookBass)?S.hookBass:S.bass;
+  const bm=T==='intro'?(rs()<.4&&['dark','dream'].includes(S.mood)?'drone':'off'):T==='verse'?(bt==='soft'||bt==='reese'?'long':rs()<.4?'sparse':'follow'):
+   T==='build'?(['aggro','hype'].includes(S.mood)?'pulse':'off'):T==='hook'?(bt==='reese'||(bt==='soft'&&rs()<.5)?'long':'follow'):T==='break'?(rs()<.5?'drone':'off'):(rs()<.5?'long':'off');
+  const stabs=shuf0(rs,[0,3,6,8,10,12].filter(x=>x<n)).slice(0,T==='hook'?3:ri0(rs,1,2)).concat(0),fills=['roll','hats','tom','drop'],fill=fills[Math.floor(rs()*4)];
+  const tl=s=>(S.secs.length);
+  for(let bar=0;bar<sc.bars;bar++){rb=mulberry(S.seed+i*977+bar*31+7);const o=bar*n,cd=S.prog[bar%4],ncd=S.prog[(bar+1)%4],last=bar===sc.bars-1,mid=bar%4===3&&!last;
+   const gapped=s=>gp(bar,s);
+   /* 드럼 */
+   if(T==='build'){const p0=bar/sc.bars;for(let s=0;s<n;s++){const p=(bar*n+s)/(sc.bars*n),ev=p<.5?4:p<.78?2:1;if(s%ev===0)add(bar,s,'snare',[.25+.7*p],4)}
+    if(sc.drum.kick[0]&&bar%2===0)add(bar,0,'kick',[.9],3);for(let s=0;s<n;s++)if(sc.drum.hat[s]&&bar<sc.bars-1)add(bar,s,'hat',[(.5+.3*p0)*(.8+rb()*.3)],5)}
+   else for(let s=0;s<n;s++){
+    for(const k in sc.drum){let v=sc.drum[k][s];if(!v)continue;
+     if((T==='verse'||T==='hook')&&bar%2){if(k==='hat'&&rb()<.07)continue;if(k==='kick'&&s&&v===1&&rb()<.1)continue}
+     if(last&&(T==='hook'||T==='verse')&&s>=n-4&&(fill==='drop'&&k==='kick'||fill==='roll'&&k==='hat'))continue;
+     const ac=s%4===0?1:s%2===0?.78:.58,jv=.88+rb()*.24;
+     if(k==='hat'){if(v===3){for(let q=0;q<3;q++)add(bar,s+q/3,'hat',[(.4+q*.18)*jv],2)}else add(bar,s,'hat',[(v===2?.35:ac*.9)*jv],5)}
+     else if(k==='kick')add(bar,s,'kick',[(v===2?.4:1)*(.93+rb()*.1)],3);
+     else if(k==='snare')add(bar,s,'snare',[(v===2?.28+rb()*.12:1)*jv],v===2?5:3,false);
+     else if(k==='clap')add(bar,s,'clap',[jv],3);
+     else add(bar,s,k,[(v===2?.5:.85)*jv],4)}
+    if(sc.drum.snare[s]===1&&s>0){const x=e.length-1;void x}}
+   if(!gapped(n-1)&&(T==='hook'||T==='verse')){
+    if(last){if(fill==='roll'){for(let s=n-4;s<n;s++)add(bar,s,'snare',[.3+.15*(s-n+4)],3);add(bar,n-1,'clap',[.6],3)}
+     else if(fill==='hats'){for(let s=n-4;s<n;s++)for(let q=0;q<3;q++)add(bar,s+q/3,'hat',[.3+.1*q+.04*(s-n+4)],2)}
+     else if(fill==='tom'){[n-4,n-3,n-2].forEach((s,q)=>{add(bar,s+.5,'perc',[.8],3)})}}
+    else if(mid&&rb()<.7){const s=n-2;for(let q=0;q<3;q++)add(bar,s+q/3,'hat',[.35+.12*q],2)}}
+   /* 베이스 */
+   const root=d=>{let m=28+S.key+S.scl[d%7];if(m>43)m-=12;return bt==='reese'?m+12:m};
+   const bnote=(s,d,m,to,v=1)=>{let dd=d;if(sc.gap&&bar===sc.gap.bar&&s<sc.gap.from&&s+dd>sc.gap.from)dd=sc.gap.from-s;if(dd<1||gapped(s))return;add(bar,s,'bass',[m,dd*sd*.95,bm==='drone'?'soft':bt,to,v],2)};
+   if(bm==='follow'){const ks=[];for(let s=0;s<n;s++)if(sc.drum.kick[s]===1)ks.push(s);
+    ks.forEach((s,j)=>{const nxs=ks[j+1]!==undefined?ks[j+1]:n,d=Math.min(nxs-s,6),lastN=j===ks.length-1;let to=0;
+     if(lastN&&ncd!==cd&&rb()<.5)to=root(ncd);else if(!lastN&&rb()<.16)to=root(cd)+pk0(rb,[-2,-1,3,5]);
+     const oct=(T==='hook'&&s>0&&rb()<.12)?12:0;bnote(s,d,root(cd)+oct,to,.9+rb()*.12)})}
+   else if(bm==='sparse'){bnote(0,10,root(cd),0);if(rb()<.5)bnote(pk0(rb,[10,12].filter(x=>x<n)),4,root(cd)+(rb()<.3?7:0),0,.8)}
+   else if(bm==='long'){bnote(0,10,root(cd),ncd!==cd&&rb()<.3?root(ncd):0);if(rb()<.4&&n>=16)bnote(10,6,root(cd)+pk0(rb,[0,7,-2]),0,.8)}
+   else if(bm==='pulse'&&bar>=sc.bars-2){for(let s=0;s<n;s+=2)bnote(s,1.6,root(cd),0,.45+.2*(bar-sc.bars+3))}
+   else if(bm==='drone'&&bar%2===0)bnote(0,n*Math.min(2,sc.bars-bar),root(cd),0,.55);
+   /* 패드 · 키 */
+   if(T!=='build'||bar===0){if(!(T==='verse'&&bar%2&&rb()<.3)){const pv={intro:.8,verse:.6,hook:1,break:1.1,outro:.8,build:.8}[T];
+     tri(cd,S.sev).forEach((m,q)=>add(bar,q*.12,'pad',[m,n*sd*1.05,M.pad,pv],0))}}
+   else if(T==='build')tri(cd,S.sev).forEach(m=>add(bar,0,'pad',[m,n*sd*1.02,M.pad,.7],0));
+   if((T==='verse'||T==='hook')&&!(T==='verse'&&bar%2&&rb()<.4))stabs.forEach(s=>{if(s<n)tri(cd,S.sev).forEach((m,q)=>add(bar,s+q*.04,'keys',[m,3*sd,M.keys],4))});
+   /* 효과음 */
+   const fx=f=>S.fx.includes(f);
+   if(bar===0){if(T==='hook'){add(bar,0,fx('impact')?'impact':'subdrop',[],0,true);if(!['dark','sad','dream'].includes(S.mood))add(bar,0,'crash',[],0,true)}
+    if(T==='break'){add(bar,0,fx('tapestop')?'tapestop':'subdrop',[mtof?dm(cd)-12:55],0,true)}
+    if((T==='verse'||T==='break'||T==='intro')&&fx('whisper')&&rb()<.5)add(bar,2,'whisper',[sd*n*Math.min(2,sc.bars)],0,true)}
+   if(T==='build'&&bar===sc.bars-2)add(bar,0,'riser',[2*n*sd],0,true);
+   if(T==='build'&&last&&fx('revcrash'))add(bar,0,'revcrash',[n*sd],0,true);
+   if(T==='intro'&&last&&rb()<.6)add(bar,0,fx('revcrash')?'revcrash':'riser',[n*sd],0,true);
+   if(last&&nx==='hook'&&T!=='build'&&fx('revcrash'))add(bar,n-8>0?n-8:0,'revcrash',[8*sd],0,true);
+   if((T==='intro'||T==='break'||T==='outro')&&fx('bellhit')&&rb()<.35)add(bar,pk0(rb,[3,6,10]),'bellhit',[dm(cd+7+pk0(rb,[0,2,4,6]))+12],0,true);
+   if(T==='outro'&&last)add(bar,0,'subdrop',[],0,true)}
+  /* 멜로디 */
+  const ls=$('lv').value,lv=ls!=='auto'?ls:T==='hook'?S.leadH:T==='build'?(M.lead.includes('pluck')?'pluck':S.leadV):['intro','break','outro'].includes(T)?(['bell','piano','choir'].includes(S.leadV)?S.leadV:'bell'):S.leadV;
+  rb=mulberry(S.seed+i*53+11);
+  sc.mel.forEach(m=>{const bar=Math.floor(m.s/n),s=m.s%n;add(bar,s,'lead',[m.m,m.d*sd,lv,m.v*(.9+rb()*.2)],8)});
+  off+=sc.bars*n*sd}
+ e.sort((x,y)=>x.t-y.t);return{evs:e,len:off,starts:st}}
+function shuf0(r,a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const ri0=(r,a,b)=>a+Math.floor(r()*(b-a+1)),pk0=(r,a)=>a[Math.floor(r()*a.length)];
+
+/* ---------- 재생 ---------- */
+function tick(){const now=actx.currentTime;
+ while(ei<evs.length&&t0+evs[ei].t<now+.2){const e=evs[ei++];try{V[e.f](t0+e.t,...e.a)}catch(x){console.error(x)}}
+ if(ei>=evs.length&&now>t0+len-.25){if(loopMode){ei=0;t0+=len}else if(now>t0+len+2.5){stopAll();return}}
+ const p=Math.max(0,Math.min(now-t0,len));let c=starts[0][1];starts.forEach(s=>{if(s[0]<=p)c=s[1]});
+ $('barI').style.width=(100*p/len)+'%';
+ if(c!==hl){hl=c;song.secs.forEach((_,i)=>{const x=$('s'+i);if(x)x.classList.toggle('hl',i===c)});$('st').textContent='재생 중 · '+LBL[song.secs[c].type]}}
+async function start(a,b){stopAll();if(!song)best();
+ actx=actx||new(window.AudioContext||window.webkitAudioContext)();await actx.resume();
+ ctx=actx;bus=mkBus(actx);nbuf=nbuf&&nbuf.sampleRate===actx.sampleRate?nbuf:mkNoise(actx);rng=[a,b];loopMode=a===b;
+ const x=buildEvents(a,b);evs=x.evs;len=x.len;starts=x.starts;ei=0;t0=actx.currentTime+.15;playing=true;hl=-1;sched=setInterval(tick,25);$('stop').disabled=false}
+function stopAll(){playing=false;clearInterval(sched);if(bus){try{bus.stop();bus.m.disconnect()}catch(e){}}bus=null;
+ $('stop').disabled=true;$('barI').style.width='0';if(song){song.secs.forEach((_,i)=>{const x=$('s'+i);if(x)x.classList.remove('hl')});$('st').textContent=''}}
+function resync(){if(!playing)return;const x=buildEvents(rng[0],rng[1]);evs=x.evs;len=x.len;starts=x.starts;
+ const p=actx.currentTime-t0;ei=evs.findIndex(e=>e.t>p+.25);if(ei<0)ei=evs.length}
+async function exportWav(){if(!song)return;$('st').textContent='WAV 만드는 중… 잠시만 기다려 주세요';await new Promise(r=>setTimeout(r,30));
+ const sr=44100,x=buildEvents(0,song.secs.length-1),N=Math.ceil((x.len+3)*sr),oc=new OfflineAudioContext(2,N,sr);
+ const sv=[ctx,bus,nbuf];ctx=oc;bus=mkBus(oc);nbuf=mkNoise(oc);x.evs.forEach(e=>{try{V[e.f](.05+e.t,...e.a)}catch(er){console.error(er)}});[ctx,bus,nbuf]=sv;
+ const r=await oc.startRendering(),ch=[r.getChannelData(0),r.getChannelData(1)],bytes=44+N*4,buf=new ArrayBuffer(bytes),v=new DataView(buf);
+ const str=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+ str(0,'RIFF');v.setUint32(4,bytes-8,true);str(8,'WAVE');str(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);v.setUint32(24,sr,true);v.setUint32(28,sr*4,true);v.setUint16(32,4,true);v.setUint16(34,16,true);str(36,'data');v.setUint32(40,N*4,true);
+ let pk=0;for(let i=0;i<N;i++)pk=Math.max(pk,Math.abs(ch[0][i]),Math.abs(ch[1][i]));const gn=pk>.95?.95/pk:1;
+ let o=44;for(let i=0;i<N;i++)for(let c=0;c<2;c++){const s=Math.max(-1,Math.min(1,ch[c][i]*gn));v.setInt16(o,s<0?s*32768:s*32767,true);o+=2}
+ window.__wavPeak=pk;
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));a.download='beat-lab-song.wav';a.click();$('st').textContent='WAV 저장 완료'}
+
+/* ---------- UI ---------- */
+function score(){const S=song,M=MOODS[S.mood];let sc=0;
+ S.secs.forEach(x=>{const k=x.drum.kick.filter(v=>v===1).length,h=x.drum.hat.filter(Boolean).length;
+  if(x.type==='hook'){sc+=k>=3&&k<=6?2:-2;sc+=h>=4?1:-2}if(x.type==='verse')sc+=k>=2&&k<=5?2:-1;
+  if(x.drum.kick.some((v,i)=>v&&x.drum.snare[i]))sc-=3});
+ const hk=S.secs.filter(x=>x.type==='hook'),mel=hk.reduce((a,x)=>a+x.mel.length/x.bars,0)/Math.max(1,hk.length);
+ sc+=Math.abs(mel-(2+M.dens*3))<1.5?2:-1;sc+=new Set(S.prog).size>=2?1:-2;return sc+Math.random()*.5}
+function renderAll(){
+ $('secs').innerHTML=song.secs.map((s,i)=>`<div class="sec ${i===sel?'on':''}" id="s${i}" onclick="pickSec(${i})"><b>${LBL[s.type]}</b><small>${s.bars}마디</small><span onclick="event.stopPropagation();start(${i},${i})">▶ 구간</span></div>`).join('');
+ grid();info()}
+function pickSec(i){sel=i;song.secs.forEach((_,j)=>{const x=$('s'+j);if(x)x.classList.toggle('on',j===i)});grid()}
+function grid(){const sc=song.secs[sel],n=song.spb;$('gl').textContent='· '+LBL[sc.type]+' (1마디 패턴)';
+ $('grid').innerHTML=ROWS.map(([k,l])=>`<div class="row"><strong>${l}</strong><div class="cells" style="grid-template-columns:repeat(${n},1fr)">${sc.drum[k].map((v,i)=>`<button class="c ${v===1||v===3?'on':v===2?'gh':''} ${i%4===0?'q':''}" data-r="${k}" data-i="${i}" aria-label="${l} ${i+1}"></button>`).join('')}</div></div>`).join('')}
+$('grid').onclick=e=>{const t=e.target;if(t.dataset&&t.dataset.r){const a=song.secs[sel].drum[t.dataset.r],i=+t.dataset.i;a[i]=(a[i]+1)%3;t.className='c '+(a[i]===1?'on':a[i]===2?'gh':'')+(i%4===0?' q':'');resync()}};
+function info(){const S=song,sd=60/S.bpm/4,tot=S.secs.reduce((a,s)=>a+s.bars*S.spb*sd,0);
+ $('info').innerHTML=`<span class="pill">${S.genre}</span><span class="pill">${MOODS[S.mood].n}</span><span class="pill">${S.bpm} BPM</span><span class="pill">${NN[S.key]} ${SCN[S.mode]}</span><span class="pill">약 ${Math.round(tot)}초 · ${S.secs.reduce((a,s)=>a+s.bars,0)}마디</span><br>코드: ${S.prog.map(cn).join(' → ')} (1마디씩 반복)<br><span style="color:var(--muted)">판단: ${MOODS[S.mood].nt}</span>`+
+ `<div class="trk">${S.notes.join('<br>')}</div>`+
+ S.secs.map(s=>`<div class="trk"><b>${LBL[s.type]} ${s.bars}마디</b>${s.gap?' · <span style="color:var(--green)">집중용 공백</span>':''}<br>${LAY[s.type]}<br>멜로디: ${s.mel.slice(0,8).map(x=>nm(x.m)).join(' ')} …</div>`).join('')}
+$('mx').innerHTML=MX.map(([k,l])=>`<div><label>${l}</label><input type="range" min="0" max="1" step=".05" value="${mix[k]}" oninput="setMix('${k}',this.value)"><label style="margin:6px 0 0"><input type="checkbox" style="width:auto" onchange="setMute('${k}',this.checked)"> 뮤트</label></div>`).join('');
+function applyMix(k){if(bus&&bus[k])bus[k].gain.value=mute[k]?0:mix[k]}
+function setMix(k,v){mix[k]=+v;applyMix(k)}function setMute(k,c){mute[k]=c;applyMix(k)}
+function compose(){const S=song,k=$('kw').value.split(/[,，\s]+/).filter(Boolean),kw=i=>k.length?k[i%k.length]:'밤',tp=$('topic').value.trim()||'성장',lg=$('lang').value;
+ const ko=`[Hook]\n${kw(0)}의 끝에서 ${tp}, 멈추지 않아\n${kw(1)}을 안고 더 높이 올라가\n${kw(2)}만 보고 달려, 흔들림 없이\n오늘의 나를 넘어 ${kw(3)}을 만들어\n\n[Verse]\n불 꺼진 거리 위에 계획을 새겨\n작은 시작이라도 끝까지 밀어\n말보다 결과로 내 이름을 증명해`;
+ const en=`[Hook]\nI came too far, I won’t fall back\nTurn every doubt into a track\nNo ceiling here, I’m built to rise\nI see the future in my eyes\n\n[Verse]\nMidnight city, got a plan in my head\nEvery little step puts a brick where I stand\nNo shortcuts, let the work speak loud\nQuiet ambition, never chasing the crowd`;
+ const h=S.secs.find(s=>s.type==='hook');
+ lastTxt=`TITLE: ${['NO LIMITS','AFTER THE STORM','NEON CROWN','BUILT FROM NIGHT','RUN THE CITY'][Math.floor(Math.random()*5)]}\n\nCONCEPT\n${tp} · ${S.genre} · ${MOODS[S.mood].n}\n${NN[S.key]} ${SCN[S.mode]} · ${S.bpm} BPM\n\nSOUND\n${S.notes.join('\n')}\n\nARRANGEMENT\n${S.secs.map(s=>LBL[s.type]+' '+s.bars).join(' → ')}\n\nCHORDS\n${S.prog.map(cn).join(' → ')}\n\nHOOK MELODY\n${h?h.mel.slice(0,10).map(x=>nm(x.m)).join(' '):'-'}\n\nLYRICS DRAFT\n${lg==='영어'?en:lg==='한국어'?ko:ko+'\n\n'+en}`;
+ $('cmpOut').textContent=lastTxt;$('cp').disabled=false}
+function rejudge(){if(!song)return;rnd=mulberry((Math.random()*2**31)|0);judge(MOODS[song.mood]);info();resync()}
+function best(){let b=null,bs=-1e9;for(let i=0;i<5;i++){gen1();const s=score();if(s>bs){bs=s;b=song}}song=b;sel=0;stopAll();renderAll()}
+$('gen').onclick=()=>{$('st').textContent='작곡 중… 여러 후보를 비교해 가장 어울리는 곡을 고르고 있어요';setTimeout(()=>{best();$('st').textContent='새 곡 완성 · ▶ 로 들어보세요'},40)};
+$('mel').onclick=regenMel;$('drm').onclick=regenDrums;$('play').onclick=()=>start(0,song.secs.length-1);$('stop').onclick=stopAll;$('wav').onclick=exportWav;$('cmp').onclick=compose;
+$('bassSel').onchange=rejudge;$('lv').onchange=rejudge;
+$('cp').onclick=async()=>{try{await navigator.clipboard.writeText(lastTxt);$('cp').textContent='복사 완료 ✓'}catch(e){$('cp').textContent='복사 권한 없음'}};
+best();
+</script></body></html>
